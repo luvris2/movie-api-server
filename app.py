@@ -10,7 +10,7 @@ from resources.review import ReviewDetailResource, AddReviewResource
 
 from resources.favorite import FavoriteResource, MyFavoriteResource
 
-from resources.recommend import MovieRecommendResource
+from resources.recommend import MovieRecommendResource, MovieRecommendRealTimeResource
 
 # API 서버를 구축하기 위한 기본 구조
 app = Flask(__name__)
@@ -49,6 +49,7 @@ api.add_resource(FavoriteResource, '/movie_list/<int:movie_id>')
 api.add_resource(MyFavoriteResource, '/favorite_list')
 
 api.add_resource(MovieRecommendResource, '/movie_list/recommend')
+api.add_resource(MovieRecommendRealTimeResource, '/movie_list/realtime_recommend')
 
 if __name__ == '__main__' :
     app.run()
