@@ -1,58 +1,61 @@
-# memo-api-server
-
-# 로그인과 로그아웃이 가능한 메모장 API 
+# 영화 추천 시스템 API 
 **기능 설명**
-- 로그인, 로그아웃 기능
-- 메모 작성, 수정, 삭제 기능
-- 자신의 메모 보기 기능, 다른 사람은 열람 불가
-- 팔로우한 친구의 메모 공유
+- 회원가입, 로그인, 로그아웃, 내 정보보기 기능
+- 영화 목록 보기, 특정 영화 상세보기, 영화 검색 기능
+- 리뷰 작성, 보기 기능
+- 즐겨찾기 추가, 해제, 나의 즐겨찾기 목록 보기 기능
+- 실시간 영화 추천 기능
 ---
 # DB 구조
+### Table : movie
+- Columns
+  - id : 기본 인덱스 (INT/ PK, NN, UN, AI)
+  - title : 영화 제목 (VARCHAR(100)
+  - genre : 영화 장르 (VARCHAR(100)
+  - summary : 영화 설명 (VARCHAR(500)
+  - attendance : 관람객 (INT)
+  - year : 개봉일 (TIMESTAMP)
+- Foreign Keys
+  - memo table : user_id -> user table : id
 ### Table : user
 - Columns
   - id : 기본 인덱스 (INT/ PK, NN, UN, AI)
   - email : 이메일 (VARCHAR(45)/ UQ)
-  - password : 비밀번호 (VARCHAR256)
-  - nickname : 사용자 이름 (VARCHAR45)
-  - created_at : 생성일자 (TIMESTAPM) / Default=now()
-### Table : memo
+  - password : 비밀번호 (VARCHAR200)
+  - name : 사용자 이름 (VARCHAR45)
+  - gender : 성별 (VARCHAR(10)
+### Table : favorite
 - Columns
-  - id : 기본 인덱스 (INT/ PK, NN, UN, AI)
-  - title : 메모의 제목 (VARCHAR(45)
-  - date : 이행 시간 (VARCHAR(45)
-  - content : 메모 내용 (VARCHAR(256)
-  - created_at : 메모 생성일 (TIMESTAMP)/ Default=now()
-  - updated_at : 메모 수정일 (TIMESTAMP)/ Default=now() on update now()
-  - user_id : Foreign Key Value (INT/ NN, UN)
+   - id : 기본 인덱스 (INT/ PK, NN, UN, AI)
+   - user_id : 사용자 식별 ID (INT/ UN)
+   - movie_id : 영화 식별 ID (INT/ UN)
+   - created_at : 즐겨찾기지정일 (TIMESTAMP)/ Default=now()
+   - favorite : 즐겨찾기여부 (TINYINT/ NN, UN)/ Default=False
 - Foreign Keys
-  - memo table : user_id -> user table : id
-### Table : follow
+  - favorite table : user_id -> user table : id
+  - favorite table : movie_id -> movie table : id
+### Table : rating
 - Columns
-    - id : 기본 인덱스 (INT/ PK, NN, UN, AI)
-    - follower_id : 팔로우한 사람 (INT/ UN)
-    - followee_id : 팔로우 당한 사람 (INT/ UN)
-    - created_at : 팔로우 일자 (TIMESTAMP)/ Default=now()
-- Foreign Keys
-  - follow table : follower_id -> user table : id
-  - follow table : followee_id -> user table : id
-- Indexes
-  - Type : UNIQUE
-  - Column : follower_id, followee_id
+   - id : 기본 인덱스 (INT/ PK, NN, UN, AI)
+   - user_id : 사용자 식별 ID (INT/ UN)
+   - movie_id : 영화 식별 ID (INT/ UN)
+   - created_at : 리뷰 작성일 (TIMESTAMP)/ Default=now()
+   - updated_at : 리뷰 수정일 (TIMESTAMP)/ Default=now() on update now()
 ---
 
 # 파일 구조
 - app.py : API 메인 파일
   - resources 폴더
-    - follow.py : 친구 관련 기능
-    - memo_modify.py : 메모 작성, 수정, 열람, 삭제 기능
-    - user.py : 회원가입, 로그인, 로그아웃 기능
+    - favorite.py : 즐겨찾기 추가, 해제, 목록보기 기능
+    - movie.py : 영화 목록, 상세 정보, 검색 기능
+    - user.py : 회원가입, 로그인, 로그아웃, 나의 정보 보기 기능
   - ref 폴더
     - config.py : 가상환경 설정 (토큰)
     - mysql_connection.py : DB 연동 설정
     - utils.py : 비밀번호 암호화, 식별 ID 토큰화 설정
-
+  - data 폴더
+    - movie_correlations.csv : 영화 추천 시스템의 상관관계 계수를 가지는 데이터 프레임 (실시간에서는 사용 X)
 ---
-
 # 각 파일 설명
 **app.py**
 - API의 기본 틀이 되는 메인 파일
@@ -61,7 +64,6 @@
 - 리소스화 된 클래스들의 경로 설정 (API 기능)
 
 ---
-
 **mysql_connection.py**
 - DB 연동에 관련된 함수를 정의한 파일
   - 해당 코드는 개개인의 환경에 따라 다르므로 파일은 미첨부
@@ -76,9 +78,7 @@ def get_connection() :
         password='password' )
     return connection
 ```
-
 ---
-
 **config.py**
 - 가상 환경의 값을 설정하는 파일
   - 토큰의 암호화 방식 설정
@@ -106,20 +106,27 @@ def get_connection() :
     - 생성된 토큰을 파괴  
 
 ---
+ **movie.py**
+- class MovieListResource
+  - 전체 영화 목록 페이지당 25개씩 출력
+- class MovieDetailResource
+  - 특정 영화 상세 보기
+    - 영화명, 개봉일, 관람객, 별점평균
+- class MovieSearchResource
+  - 영화 검색
+    - 검색어가 포함된 영화 출력
 
- **memo_modify.py**
-- class MemoResource
-  - 입력한 메모를 작성
-  - 작성한 메모 조회
-    - 다른 사람의 메모는 조회 불가
-- class MemoModifyResource
-  - 작성한 메모 수정
-    - 친구의 메모는 조회만 가능하며, 수정은 불가
-  - 작성한 메모 삭제
-    - 삭제 또한 친구의 메모는 삭제 불가
+
+#작성중
+
+#작성중
+
+#작성중
+
+#수정해야함
 
 **follow.py**
-- class Friends
+- class FavoriteResource
     - 팔로우
       - 이메일 존재 유무 확인
       - 이메일이 존재하면 팔로우

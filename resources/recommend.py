@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 
 class MovieRecommendResource(Resource) :
-    # 영화 추천 서비스
+    # CSV파일을 이용한 영화 추천 서비스
     @jwt_required()
     def get(self):
         # 유저 식별
@@ -60,6 +60,7 @@ class MovieRecommendResource(Resource) :
                 }
 
 class MovieRecommendRealTimeResource(Resource) :
+    # 실시간 영화 추천
     @jwt_required()
     def get(self):
         user_id = get_jwt_identity()

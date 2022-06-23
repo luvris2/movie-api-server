@@ -60,6 +60,7 @@ class UserRegisterResource(Resource) :
          }
 
 class UserLoginResource(Resource) :
+    # 로그인
     def post(self) :
         data = request.get_json()
         connection = get_connection()
