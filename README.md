@@ -115,23 +115,14 @@ def get_connection() :
 - class MovieSearchResource
   - 영화 검색
     - 검색어가 포함된 영화 출력
-
-
-#작성중
-
-#작성중
-
-#작성중
-
-#수정해야함
-
-**follow.py**
+---
+**favorite.py**
 - class FavoriteResource
-    - 팔로우
-      - 이메일 존재 유무 확인
-      - 이메일이 존재하면 팔로우
-    - 팔로우한 친구의 메모 함께 보기
-      - 팔로우한 친구(followee)의 메모와 내 메모를 함께 리스트로 출력
-    - 팔로우 해제
-      - 팔로우 테이블의 데이터를 삭제
-      - 팔로우를 해제하면 상대와 나의 메모가 보이지 않음
+    - 즐겨찾기 추가, 해제, 즐겨찾기 목록 보기
+ ---
+**recommend.py**
+- class MovieRecommendResource
+  - 전체 영화의 상관관계를 구한 csv파일을 이용하여 유사도 높은 영화를 추천
+- class MovieRecommendRealTimeResource
+  - DB의 데이터를 가공하여 상관관계를 구하고 유사도 높은 
+ 영화를 실시간으로 추천
